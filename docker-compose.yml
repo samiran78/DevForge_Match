@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: devmatch-postgres
+    environment:
+      POSTGRES_USER: devmatch
+      POSTGRES_PASSWORD: devmatch_secret
+      POSTGRES_DB: devmatch
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devmatch"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: devmatch-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: devmatch-backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://devmatch:devmatch_secret@postgres:5432/devmatch
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://frontend:3000
+    env_file:
+      - backend/.env
+    expose:
+      - "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: devmatch-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: /api
+      NEXT_PUBLIC_WS_URL: /api
+      BACKEND_API_URL: http://backend:3001
+    env_file:
+      - frontend/.env
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: devmatch-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
