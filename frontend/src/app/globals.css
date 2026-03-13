@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --violet-deep: #0f0a1a;
+  --violet-mid: #2d1b4e;
+  --neon-pink: #ff2d6a;
+  --neon-blue: #00d4ff;
+  --glass-bg: rgba(45, 27, 78, 0.4);
+  --glass-border: rgba(139, 92, 246, 0.2);
+}
+
+body {
+  @apply bg-violet-950 text-white antialiased;
+  background: linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 50%, #0d0618 100%);
+  min-height: 100vh;
+}
+
+.glass {
+  @apply backdrop-blur-xl border;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+}
+
+.glow-pink {
+  box-shadow: 0 0 30px rgba(255, 45, 106, 0.4);
+}
+
+.glow-blue {
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+}
+
+.aura-ring {
+  background: conic-gradient(
+    from 0deg,
+    var(--neon-pink),
+    var(--neon-blue),
+    #bf5af2,
+    var(--neon-pink)
+  );
+  animation: aura-spin 8s linear infinite;
+}
+
+@keyframes aura-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+.card-tilt:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+}
