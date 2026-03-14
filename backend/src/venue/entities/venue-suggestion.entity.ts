@@ -11,7 +11,6 @@ import { Match } from '../../matching/entities/match.entity';
 
 @Entity('venue_suggestions')
 @Index(['matchId'])
-@Index(['location'])
 export class VenueSuggestion {
   @PrimaryGeneratedColumn('uuid')
   id: string;

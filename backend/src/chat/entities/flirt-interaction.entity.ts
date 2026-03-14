@@ -33,4 +33,5 @@ export class FlirtInteraction {
   @ManyToOne(() => Match, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'matchId' })
   match: Match;
+
 }
